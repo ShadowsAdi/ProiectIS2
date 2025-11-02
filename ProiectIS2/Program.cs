@@ -1,3 +1,7 @@
+using Microsoft.EntityFrameworkCore;
+using ProiectIS2.Contexts;
+using Microsoft.Extensions.DependencyInjection;
+
 namespace ProiectIS2;
 
 public class Program
@@ -12,6 +16,11 @@ public class Program
         // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
         builder.Services.AddEndpointsApiExplorer();
         builder.Services.AddSwaggerGen();
+        
+        var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
+
+        builder.Services.AddDbContext<ApplicationDbContext>(options =>
+            options.UseMySql(connectionString, ServerVersion.AutoDetect(connectionString)));
 
         var app = builder.Build();
 
@@ -19,7 +28,11 @@ public class Program
         if (app.Environment.IsDevelopment())
         {
             app.UseSwagger();
-            app.UseSwaggerUI();
+            app.UseSwaggerUI(c =>
+            {
+                c.SwaggerEndpoint("/swagger/v1/swagger.json", "ProiectIS2");
+                c.RoutePrefix = string.Empty;
+            });
         }
 
         app.UseHttpsRedirection();
