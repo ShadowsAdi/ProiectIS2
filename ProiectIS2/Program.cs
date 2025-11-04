@@ -44,12 +44,27 @@ public class Program
 
         app.UseAuthorization();
         
-        app.UseMiddleware<ApiKeyMiddleware>();
+        Console.WriteLine("Use Middleware?");
+        var command = Console.ReadLine();
 
+        if (command == "yes")
+        {
+            app.UseMiddleware<ApiKeyMiddleware>();
+        }
+        
         app.MapControllers();
         
-        var obj = new DatabaseSeeder();
-        _ = obj.DownloadData();
+        Console.WriteLine("Seed Database?");
+        
+        command = Console.ReadLine();
+
+        if (command == "yes")
+        {
+            var scope = app.Services.CreateScope();
+            var obj = new DatabaseSeeder(scope.ServiceProvider.GetRequiredService<ApplicationDbContext>());
+            // trick
+            _ = Task.Run(async () => await obj.DownloadData());
+        }
 
         app.Run();
     }

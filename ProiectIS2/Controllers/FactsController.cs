@@ -19,6 +19,7 @@ namespace ProiectIS2.Controllers
 
         // GET: api/Facts
         [HttpGet]
+        [Produces("application/json")]
         [ProducesResponseType(StatusCodes.Status200OK)]
         public async Task<ActionResult<IEnumerable<Facts>>> GetCatFacts()
         {
@@ -27,6 +28,7 @@ namespace ProiectIS2.Controllers
 
         // GET: api/Facts/5
         [HttpGet("{id}")]
+        [Produces("application/json")]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         public async Task<ActionResult<Facts>> GetFacts(int id)
@@ -77,6 +79,7 @@ namespace ProiectIS2.Controllers
         // POST: api/Facts
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPost]
+        [Produces("application/json")]
         [ProducesResponseType(StatusCodes.Status201Created)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         public async Task<ActionResult<Facts>> PostFacts(Facts facts)

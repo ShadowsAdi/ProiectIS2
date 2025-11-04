@@ -2,6 +2,6 @@
 
 cd ProiectIS2
 
-1. dotnet ef migrations add Initial --context ProiectIS2.Contexts.ApplicationDbContext --output-dir Database\Migration
+1. dotnet ef migrations add Initial --context ProiectIS2.Contexts.ApplicationDbContext --output-dir Database\Migrations
 
-2. dotnet ef database update --context ProiectIS2.Contexts.ApplicationDbContex
+2. dotnet ef database update --context ProiectIS2.Contexts.ApplicationDbContext
