@@ -50,6 +50,7 @@ public class Program
         if (command == "yes")
         {
             app.UseMiddleware<ApiKeyMiddleware>();
+            app.UseMiddleware<ExceptionMiddleware>();
         }
         
         app.MapControllers();

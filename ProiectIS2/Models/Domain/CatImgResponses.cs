@@ -1,7 +1,7 @@
 ﻿using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
-namespace ProiectIS2.Models;
+namespace ProiectIS2.Models.Domain;
 
 public class CatImgResponses
 {

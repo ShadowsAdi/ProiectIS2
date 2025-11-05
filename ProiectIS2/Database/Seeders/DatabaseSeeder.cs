@@ -1,9 +1,10 @@
 ﻿using Microsoft.EntityFrameworkCore;
+using ProiectIS2.Models.Domain;
 
 namespace ProiectIS2.Database.Seeders;
 
 using Contexts;
-using Models;
+
 public class DatabaseSeeder
 {
     private readonly ApplicationDbContext? _context;

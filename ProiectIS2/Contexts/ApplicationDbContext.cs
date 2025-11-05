@@ -1,4 +1,4 @@
-using ProiectIS2.Models;
+using ProiectIS2.Models.Domain;
 
 namespace ProiectIS2.Contexts;
 using Microsoft.EntityFrameworkCore;

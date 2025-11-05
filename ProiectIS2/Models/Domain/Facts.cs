@@ -1,6 +1,6 @@
 ﻿using System.ComponentModel.DataAnnotations;
 
-namespace ProiectIS2.Models;
+namespace ProiectIS2.Models.Domain;
 
 public class Facts {
     [Key]

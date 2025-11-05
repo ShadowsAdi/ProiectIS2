@@ -1,7 +1,7 @@
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using ProiectIS2.Contexts;
-using ProiectIS2.Models;
+using ProiectIS2.Models.Domain;
 
 namespace ProiectIS2.Controllers
 {
