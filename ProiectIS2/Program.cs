@@ -3,6 +3,7 @@ using ProiectIS2.Contexts;
 using Microsoft.Extensions.DependencyInjection;
 using ProiectIS2.Database.Seeders;
 using ProiectIS2.Middleware;
+using dotenv.net;
 
 namespace ProiectIS2;
 
@@ -22,7 +23,13 @@ public class Program
         builder.Services.AddEndpointsApiExplorer();
         builder.Services.AddSwaggerGen();
         
-        var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
+        DotEnv.Load();
+        
+        var envVars = DotEnv.Read();
+
+        string connectionString = $"user={envVars["DB_USER"]};Password={envVars["DB_PASSWORD"]};Server={envVars["DB_HOST"]};Database={envVars["DB_DATABASE"]};";
+        
+        //var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
 
         builder.Services.AddDbContext<ApplicationDbContext>(options =>
             options.UseMySql(connectionString, ServerVersion.AutoDetect(connectionString)));

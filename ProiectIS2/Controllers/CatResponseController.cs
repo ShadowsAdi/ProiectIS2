@@ -33,13 +33,13 @@ namespace ProiectIS2.Controllers
         
         // GET: api/CatResponse/5
         
-        [HttpGet("{id}")]
+        [HttpGet("{ResponseCode}")]
         [Produces("application/json")]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
-        public async Task<ActionResult<CatImgResponses>> GetCatImgResponses(int id)
+        public async Task<ActionResult<CatImgResponses>> GetCatImgResponses(int ResponseCode)
         {
-            var catImgResponses = await _context.CatImgResponses.FindAsync(id);
+            var catImgResponses = await _context.CatImgResponses.FindAsync(ResponseCode);
 
             if (catImgResponses == null)
             {
@@ -51,13 +51,13 @@ namespace ProiectIS2.Controllers
         
         // GET: api/CatResponse/5
         
-        [HttpGet("{id}.jpg")]
+        [HttpGet("{ResponseCode}.jpg")]
         [Produces("image/jpeg")]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
-        public async Task<IActionResult> GetCatImgResponsesJpg(int id)
+        public async Task<IActionResult> GetCatImgResponsesJpg(int ResponseCode)
         {
-            var catImgResponses = await _context.CatImgResponses.FindAsync(id);
+            var catImgResponses = await _context.CatImgResponses.FindAsync(ResponseCode);
 
             if (catImgResponses == null)
             {
@@ -70,13 +70,13 @@ namespace ProiectIS2.Controllers
         // PUT: api/CatResponse/200
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         
-        [HttpPut("{id}")]
+        [HttpPut("{ResponseCode}")]
         [Produces("application/json")]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
-        public async Task<IActionResult> PutCatImgResponses(int id, CatImgResponses catImgResponses)
+        public async Task<IActionResult> PutCatImgResponses(int ResponseCode, CatImgResponses catImgResponses)
         {
-            if (id != catImgResponses.ResponseCode)
+            if (ResponseCode != catImgResponses.ResponseCode)
             {
                 return BadRequest();
             }
@@ -89,7 +89,7 @@ namespace ProiectIS2.Controllers
             }
             catch (DbUpdateConcurrencyException)
             {
-                if (!CatImgResponsesExists(id))
+                if (!CatImgResponsesExists(ResponseCode))
                 {
                     return NotFound();
                 }
@@ -110,16 +110,16 @@ namespace ProiectIS2.Controllers
             _context.CatImgResponses.Add(catImgResponses);
             await _context.SaveChangesAsync();
 
-            return CreatedAtAction("GetCatImgResponses", new { id = catImgResponses.ResponseCode }, catImgResponses);
+            return CreatedAtAction("GetCatImgResponses", new { catImgResponses.ResponseCode }, catImgResponses);
         }
 
         // DELETE: api/CatResponse/5
-        [HttpDelete("{id}")]
+        [HttpDelete("{ResponseCode}")]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
-        public async Task<IActionResult> DeleteCatImgResponses(int id)
+        public async Task<IActionResult> DeleteCatImgResponses(int ResponseCode)
         {
-            var catImgResponses = await _context.CatImgResponses.FindAsync(id);
+            var catImgResponses = await _context.CatImgResponses.FindAsync(ResponseCode);
             if (catImgResponses == null)
             {
                 return NotFound();
@@ -131,9 +131,9 @@ namespace ProiectIS2.Controllers
             return NoContent();
         }
 
-        private bool CatImgResponsesExists(int id)
+        private bool CatImgResponsesExists(int ResponseCode)
         {
-            return _context.CatImgResponses.Any(e => e.ResponseCode == id);
+            return _context.CatImgResponses.Any(e => e.ResponseCode == ResponseCode);
         }
     }
 }
