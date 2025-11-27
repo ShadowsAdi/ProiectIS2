@@ -6,3 +6,6 @@ riderModule.iml
 /.idea
 ProiectIS2.sln.DotSettings.user
 ProiectIS2/.env
+*.env
+*.xml
+/ProiectIS2/.idea
