@@ -72,7 +72,7 @@ public class Program
             var scope = app.Services.CreateScope();
             var obj = new DatabaseSeeder(scope.ServiceProvider.GetRequiredService<ApplicationDbContext>());
             // trick
-            obj.DownloadData().Wait();
+            _ = Task.Run(async () => await obj.DownloadData());
         }
 
         app.Run();
