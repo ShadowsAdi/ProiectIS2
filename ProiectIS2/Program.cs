@@ -26,7 +26,8 @@ public class Program
         DotEnv.Load();
         
         var envVars = DotEnv.Read();
-
+        
+        Console.WriteLine($"DB_HOST: {envVars["DB_HOST"]}");
         string connectionString = $"user={envVars["DB_USER"]};Password={envVars["DB_PASSWORD"]};Server={envVars["DB_HOST"]};Database={envVars["DB_DATABASE"]};";
         
         //var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
@@ -71,7 +72,7 @@ public class Program
             var scope = app.Services.CreateScope();
             var obj = new DatabaseSeeder(scope.ServiceProvider.GetRequiredService<ApplicationDbContext>());
             // trick
-            _ = Task.Run(async () => await obj.DownloadData());
+            obj.DownloadData().Wait();
         }
 
         app.Run();
