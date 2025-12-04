@@ -3,12 +3,14 @@ using Microsoft.EntityFrameworkCore;
 using ProiectIS2.Contexts;
 using ProiectIS2.Models.Domain;
 using ProiectIS2.Models.DTOs;
+using TGolla.Swashbuckle.AspNetCore.SwaggerGen;
 
 namespace ProiectIS2.Controllers
 {
     //[ApiKey]
     [Route("api/[controller]")]
     [ApiController]
+    [SortSwaggerPathsByMethod(1)]
     public class FactsController : ControllerBase
     {
         private readonly ApplicationDbContext _context;

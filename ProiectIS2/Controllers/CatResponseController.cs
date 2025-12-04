@@ -7,10 +7,12 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using ProiectIS2.Contexts;
 using ProiectIS2.Models.Domain;
+using TGolla.Swashbuckle.AspNetCore.SwaggerGen;
 
 namespace ProiectIS2.Controllers
 {
     [Route("api/[controller]")]
+    [SortSwaggerPathsByMethod(2)]
     [ApiController]
     public class CatResponseController : ControllerBase
     {
