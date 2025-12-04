@@ -1,4 +1,5 @@
 ﻿using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema; //Pentru foreign key
 
 namespace ProiectIS2.Models.Domain;
 
@@ -8,8 +9,11 @@ public class Facts {
     
     [Required]
     [StringLength(800, MinimumLength=10)]
-    public required string Fact { get; init; }
+    public required string Fact { get; set; }
+    public int CategoryId { get; set; }
     
+    [ForeignKey("CategoryId")]
+    public Category? Category { get; set; }
     public bool SpecialType { get; init; }
     
     // https://learn.microsoft.com/en-us/aspnet/core/data/ef-mvc/complex-data-model?view=aspnetcore-8.0

@@ -28,7 +28,6 @@ public class DatabaseSeeder
         var client = new HttpClient();
         
         const string url = "https://huggingface.co/ngxson/demo_simple_rag_py/raw/main/cat-facts.txt";
-        var filePath = Path.Combine(outputDir, "cat-facts.txt");
 
         try
         {
@@ -40,21 +39,19 @@ public class DatabaseSeeder
             var text = await response.Content.ReadAsStringAsync();
             
             var facts = text.Split('\n');
+
+            var category = new Random();
             
             var catFacts = facts.Select(f => new Facts()
             {
                 Fact = f.Trim(),
-                SpecialType = false
+                SpecialType = false,
+                CategoryId = category.Next(1, 4) 
             }).ToList();
             
             _context?.CatFacts.AddRangeAsync(catFacts);
             if (_context != null) await _context.SaveChangesAsync();
             Console.WriteLine($"Inserted {catFacts.Count} cat facts into the database.");
-
-            /*await using var stream = await response.Content.ReadAsStreamAsync();
-            await using var fileStream = new FileStream(filePath, FileMode.Create);
-            await stream.CopyToAsync(fileStream);
-            Console.WriteLine("Saved");*/
         }
         catch (Exception ex)
         {

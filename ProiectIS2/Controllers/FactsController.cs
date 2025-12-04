@@ -2,6 +2,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using ProiectIS2.Contexts;
 using ProiectIS2.Models.Domain;
+using ProiectIS2.Models.DTOs;
 
 namespace ProiectIS2.Controllers
 {
@@ -21,9 +22,23 @@ namespace ProiectIS2.Controllers
         [HttpGet]
         [Produces("application/json")]
         [ProducesResponseType(StatusCodes.Status200OK)]
-        public async Task<ActionResult<IEnumerable<Facts>>> GetCatFacts()
+        public async Task<ActionResult<IEnumerable<FactReadDto>>> GetCatFacts()
         {
-            return await _context.CatFacts.ToListAsync();
+            // Folosim .Include() pentru a încărca relația One-to-Many
+            // Și .Select() pentru a mapa manual la DTO
+            var facts = await _context.CatFacts
+                .Include(f => f.Category) 
+                .Where(f => f.DeletedAt == null) // Filtrăm ștergerile logice definite în Facts.cs
+                .Select(f => new FactReadDto
+                {
+                    Id = f.Id,
+                    FactText = f.Fact,
+                    CategoryName = f.Category != null ? f.Category.Name : "No Category",
+                    CreatedDate = f.CreatedAt
+                })
+                .ToListAsync();
+
+            return Ok(facts);
         }
 
         // GET: api/Facts/5
@@ -31,16 +46,29 @@ namespace ProiectIS2.Controllers
         [Produces("application/json")]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
-        public async Task<ActionResult<Facts>> GetFacts(int id)
+        public async Task<ActionResult<FactReadDto>> GetFacts(int id)
         {
-            var facts = await _context.CatFacts.FindAsync(id);
+            var fact = await _context.CatFacts
+                .Include(f => f.Category)
+                .Where(f => f.DeletedAt == null)
+                .FirstOrDefaultAsync(f => f.Id == id);
 
-            if (facts == null)
+            if (fact == null)
             {
                 return NotFound();
             }
+            
+            // Mapăm manual la DTO
+            var factDto = new FactReadDto
+            {
+                Id = fact.Id,
+                FactText = fact.Fact,
+                CategoryName = fact.Category != null ? fact.Category.Name : "No Category",
+                CreatedDate = fact.CreatedAt
+            };
 
-            return facts;
+            return Ok(factDto);
+            
         }
 
         // PUT: api/Facts/5
@@ -48,14 +76,33 @@ namespace ProiectIS2.Controllers
         [HttpPut("{id}")]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
-        public async Task<IActionResult> UpdateFacts(int id, Facts facts)
+        public async Task<IActionResult> UpdateFacts(int id, FactCreateDto factDto)
         {
-            if (id != facts.Id)
+            // 1. Căutăm entitatea existentă în bază
+            var existingFact = await _context.CatFacts.FindAsync(id);
+
+            if (existingFact == null || existingFact.DeletedAt != null)
             {
-                return BadRequest();
+                return NotFound();
             }
 
-            _context.Entry(facts).State = EntityState.Modified;
+            // 2. Verificăm dacă noua categorie există (dacă se schimbă)
+            if (existingFact.CategoryId != factDto.CategoryId)
+            {
+                var categoryExists = await _context.Categories.AnyAsync(c => c.Id == factDto.CategoryId);
+                if (!categoryExists)
+                {
+                    return BadRequest("Invalid Category ID");
+                }
+            }
+
+            // 3. Actualizăm proprietățile entității cu datele din DTO
+            existingFact.Fact = factDto.Fact;
+            existingFact.CategoryId = factDto.CategoryId;
+    
+            // UpdatedAt este setat automat în ApplicationDbContext.SaveChangesAsync, 
+            // dar poți forța modificarea stării dacă e nevoie:
+            _context.Entry(existingFact).State = EntityState.Modified;
 
             try
             {
@@ -82,12 +129,42 @@ namespace ProiectIS2.Controllers
         [Produces("application/json")]
         [ProducesResponseType(StatusCodes.Status201Created)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
-        public async Task<ActionResult<Facts>> PostFacts(Facts facts)
+        public async Task<ActionResult<FactReadDto>> PostFacts(FactCreateDto factDto)
         {
-            _context.CatFacts.Add(facts);
+            // Verificăm dacă categoria există
+            var categoryExists = await _context.Categories.AnyAsync(c => c.Id == factDto.CategoryId);
+            if (!categoryExists)
+            {
+                return BadRequest("Invalid Category ID");
+            }
+
+            // Mapăm din DTO în Entitatea de Domeniu
+            var newFact = new Facts
+            {
+                Fact = factDto.Fact,
+                CategoryId = factDto.CategoryId,
+                CreatedAt = DateTime.UtcNow // Setăm explicit sau lăsăm default-ul din model
+            };
+
+            _context.CatFacts.Add(newFact);
             await _context.SaveChangesAsync();
 
-            return CreatedAtAction("GetFacts", new { id = facts.Id }, facts);
+            // Pregătim răspunsul DTO
+            // Reîncărcăm categoria pentru a avea numele ei în răspuns (opțional)
+            var categoryName = await _context.Categories
+                .Where(c => c.Id == factDto.CategoryId)
+                .Select(c => c.Name)
+                .FirstOrDefaultAsync();
+
+            var responseDto = new FactReadDto
+            {
+                Id = newFact.Id,
+                FactText = newFact.Fact,
+                CategoryName = categoryName,
+                CreatedDate = newFact.CreatedAt
+            };
+
+            return CreatedAtAction("GetFacts", new { id = newFact.Id }, responseDto);
         }
 
         // DELETE: api/Facts/5
@@ -97,11 +174,14 @@ namespace ProiectIS2.Controllers
         public async Task<IActionResult> DeleteFacts(int id)
         {
             var facts = await _context.CatFacts.FindAsync(id);
-            if (facts == null)
+    
+            // Verificăm dacă există și dacă nu e deja șters
+            if (facts == null || facts.DeletedAt != null)
             {
                 return NotFound();
             }
 
+            // Remove va declanșa logica din SaveChangesAsync (setarea DeletedAt)
             _context.CatFacts.Remove(facts);
             await _context.SaveChangesAsync();
 

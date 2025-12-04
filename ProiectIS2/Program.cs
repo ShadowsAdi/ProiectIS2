@@ -26,7 +26,8 @@ public class Program
         DotEnv.Load();
         
         var envVars = DotEnv.Read();
-
+        
+        Console.WriteLine($"DB_HOST: {envVars["DB_HOST"]}");
         string connectionString = $"user={envVars["DB_USER"]};Password={envVars["DB_PASSWORD"]};Server={envVars["DB_HOST"]};Database={envVars["DB_DATABASE"]};";
         
         //var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
