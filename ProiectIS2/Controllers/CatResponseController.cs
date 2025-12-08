@@ -7,6 +7,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using ProiectIS2.Contexts;
 using ProiectIS2.Models.Domain;
+using ProiectIS2.Models.DTOs;
 
 namespace ProiectIS2.Controllers
 {
@@ -17,7 +18,7 @@ namespace ProiectIS2.Controllers
         private readonly ApplicationDbContext _context;
 
         public CatResponseController(ApplicationDbContext context)
-        {
+        {   
             _context = context;
         }
 
@@ -71,18 +72,21 @@ namespace ProiectIS2.Controllers
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         
         [HttpPut("{ResponseCode}")]
-        [Produces("application/json")]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
-        public async Task<IActionResult> PutCatImgResponses(int ResponseCode, CatImgResponses catImgResponses)
+        public async Task<IActionResult> PutCatImgResponses([FromRoute] int ResponseCode, [FromForm] CatImgResponsesDto catImgResponses)
         {
-            if (ResponseCode != catImgResponses.ResponseCode)
+            var catImg = await _context.Set<CatImgResponses>().FirstOrDefaultAsync(e => e.ResponseCode == ResponseCode);
+
+            if (catImg == null)
             {
-                return BadRequest();
+                return NotFound();
             }
 
-            _context.Entry(catImgResponses).State = EntityState.Modified;
-
+            using var memoryStream = new MemoryStream();
+            await catImgResponses.Data.CopyToAsync(memoryStream);
+            catImg.Data = memoryStream.ToArray();
+            
             try
             {
                 await _context.SaveChangesAsync();

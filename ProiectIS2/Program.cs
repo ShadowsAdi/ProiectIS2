@@ -26,8 +26,12 @@ public class Program
         DotEnv.Load();
         
         var envVars = DotEnv.Read();
-        
+
         Console.WriteLine($"DB_HOST: {envVars["DB_HOST"]}");
+        Console.WriteLine($"DB_PW: {envVars["DB_PASSWORD"]}");
+        Console.WriteLine($"DB_USER: {envVars["DB_USER"]}");
+        Console.WriteLine($"DB_DATABASE: {envVars["DB_DATABASE"]}");
+        
         string connectionString = $"user={envVars["DB_USER"]};Password={envVars["DB_PASSWORD"]};Server={envVars["DB_HOST"]};Database={envVars["DB_DATABASE"]};";
         
         //var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
@@ -52,27 +56,36 @@ public class Program
 
         app.UseAuthorization();
         
-        Console.WriteLine("Use Middleware?");
-        var command = Console.ReadLine();
+        var useMiddleware = Environment.GetEnvironmentVariable("USE_MIDDLEWARE");
+        var seedDatabase = Environment.GetEnvironmentVariable("SEED_DATABASE");
 
-        if (command == "yes")
+        Console.WriteLine($"USE_MIDDLEWARE: {useMiddleware ?? "not set (default no)"}");
+        Console.WriteLine($"SEED_DATABASE: {seedDatabase ?? "not set (default no)"}");
+
+        if (useMiddleware?.ToLowerInvariant() == "yes" || useMiddleware?.ToLowerInvariant() == "true")
         {
             app.UseMiddleware<ApiKeyMiddleware>();
             app.UseMiddleware<ExceptionMiddleware>();
+            Console.WriteLine("Middleware ENABLED.");
         }
-        
-        app.MapControllers();
-        
-        Console.WriteLine("Seed Database?");
-        
-        command = Console.ReadLine();
+        else
+        {
+            Console.WriteLine("Middleware SKIPPED.");
+        }
 
-        if (command == "yes")
+        app.MapControllers();
+
+        if (seedDatabase?.ToLowerInvariant() == "yes" || seedDatabase?.ToLowerInvariant() == "true")
         {
             var scope = app.Services.CreateScope();
             var obj = new DatabaseSeeder(scope.ServiceProvider.GetRequiredService<ApplicationDbContext>());
             // trick
             _ = Task.Run(async () => await obj.DownloadData());
+            Console.WriteLine("Database Seeding STARTED.");
+        }
+        else
+        {
+            Console.WriteLine("Database Seeding SKIPPED.");
         }
 
         app.Run();
