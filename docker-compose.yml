@@ -17,28 +17,6 @@
       interval: 5s
       timeout: 10s
       retries: 5
-      
-  migrations:
-    build:
-      context: .
-      dockerfile: ./ProiectIS2/Dockerfile
-      args:
-        DB_USER: testuser
-        DB_PASSWORD: parolaIS2API123
-        DB_HOST: 127.0.0.1
-        DB_DATABASE: proiectis2_db
-    environment:
-      DB_USER: testuser
-      DB_PASSWORD: parolaIS2API123
-      DB_HOST: 127.0.0.1
-      DB_DATABASE: proiectis2_db
-    depends_on:
-      mysql_db:
-        condition: service_healthy
-    command: >
-      sh -c "dotnet tool install --global dotnet-ef --version 8.0.0; 
-             dotnet ef database update --context ProiectIS2.Contexts.ApplicationDbContext"
-    restart: "no" 
 
   app:
     build:
@@ -47,7 +25,7 @@
       args:
         DB_USER: testuser
         DB_PASSWORD: parolaIS2API123
-        DB_HOST: 127.0.0.1 
+        DB_HOST: mysql_db
         DB_DATABASE: proiectis2_db
     container_name: proiectis2_app
     ports:
@@ -56,10 +34,11 @@
     environment:
       DB_USER: testuser
       DB_PASSWORD: parolaIS2API123
-      DB_HOST: 127.0.0.1
+      DB_HOST: mysql_db
       DB_DATABASE: proiectis2_db
       USE_MIDDLEWARE: "no"
-      SEED_DATABASE: "yes"
+      SEED_DATABASE: "no"
+      ASPNETCORE_ENVIRONMENT: Development
     depends_on:
       mysql_db:
         condition: service_healthy
