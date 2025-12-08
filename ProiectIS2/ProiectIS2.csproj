@@ -35,7 +35,8 @@
     <ItemGroup>
       <Folder Include="Database\Factories\" />
       <Folder Include="Database\Migrations\" />
-      <Folder Include="Services\" />
+      <Folder Include="Services\Abstractions\" />
+      <Folder Include="Services\Implementations\" />
     </ItemGroup>
 
 </Project>

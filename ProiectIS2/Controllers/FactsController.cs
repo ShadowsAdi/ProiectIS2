@@ -5,7 +5,6 @@ using ProiectIS2.Models.Domain;
 
 namespace ProiectIS2.Controllers
 {
-    //[ApiKey]
     [Route("api/[controller]")]
     [ApiController]
     public class FactsController : ControllerBase
