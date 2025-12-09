@@ -1,4 +1,4 @@
-namespace ProiectIS2.Models.DTOs;
+namespace ProiectIS2.Models.DataTransferObjects.CatImgResponsesDTO;
 
 public class CatImgResponsesRecord
 {

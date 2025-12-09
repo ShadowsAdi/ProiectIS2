@@ -1,13 +1,14 @@
 using Microsoft.EntityFrameworkCore;
 using ProiectIS2.Contexts;
-using Microsoft.Extensions.DependencyInjection;
 using ProiectIS2.Database.Seeders;
 using ProiectIS2.Middleware;
 using dotenv.net;
+using ProiectIS2.Models.DataTransferObjects.CatImgResponsesDTO;
+using ProiectIS2.Models.DataTransferObjects.FactsDTO;
+using ProiectIS2.Models.DataTransferObjects.Pagination;
 using ProiectIS2.Services.Abstractions;
-using ProiectIS2.Services.Implementations;
-using ProiectIS2.Models.DTOs;
-using ProiectIS2.Models.DTOs.Pagination;
+using ProiectIS2.Services.Implementations.CatImgResponseImpl;
+using ProiectIS2.Services.Implementations.FactsImpl;
 
 namespace ProiectIS2;
 
@@ -28,7 +29,7 @@ public class Program
         builder.Services.AddSwaggerGen();
         
         builder.Services.AddScoped<IObjectService<CatImgResponsesRecord, PaginationQueryParams, CatImgResponseAddRecord, CatImgResponseUpdateRecord>, CatImgService>();
-        
+        builder.Services.AddScoped<IObjectService<FactRecord, SearchPaginationQueryParams, FactAddRecord, FactUpdateRecord>, FactsService>();
         DotEnv.Load();
         
         var envVars = DotEnv.Read();

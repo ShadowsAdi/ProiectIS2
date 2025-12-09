@@ -1,4 +1,4 @@
-namespace ProiectIS2.Models.DTOs.Pagination;
+namespace ProiectIS2.Models.DataTransferObjects.Pagination;
 
 public class PagedResponse<T>
 {

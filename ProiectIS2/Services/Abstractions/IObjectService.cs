@@ -1,5 +1,4 @@
-using ProiectIS2.Models.DTOs;
-using ProiectIS2.Models.DTOs.Pagination;
+using ProiectIS2.Models.DataTransferObjects.Pagination;
 
 namespace ProiectIS2.Services.Abstractions;
 
@@ -9,7 +8,7 @@ public interface IObjectService<T, TQueryParams, TY, TZ>
     
     public Task<T?> GetObject(int objectId);
 
-    public Task AddObject(TY obj);
+    public Task<int> AddObject(TY obj);
     public Task UpdateObject(TZ obj);
     public Task DeleteObject(int objectId);
 }
