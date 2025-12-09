@@ -73,34 +73,50 @@ public class DatabaseSeeder
             422, 423, 424, 425, 426, 428, 429, 431, 451,
             500, 501, 502, 503, 504, 505, 506, 507, 508, 510, 511
         ];
+        
+        const string responseDirectory = "./responses";
+        Directory.CreateDirectory(responseDirectory);
 
         foreach (var code in httpCodes)
         {
-            var url = $"https://http.cat/{code}.jpg";
+            var fileName = $"{code}.jpg";
+            var url = $"https://http.cat/{fileName}";
+            
+            
+            var filePath = Path.Combine(responseDirectory, fileName); 
 
             try
             {
                 var exists = _context != null 
-                              && await _context.CatImgResponses.AnyAsync(resp => 
-                                  resp.ResponseCode == code);
+                             && await _context.CatImgResponses.AnyAsync(resp => 
+                                 resp.ResponseCode == code);
                 if (exists)
+                {
+                    Console.WriteLine($"Skipping {code}. Database entry already exists.");
                     continue;
+                }
 
                 var bytes = await httpClient.GetByteArrayAsync(url);
+        
+                await File.WriteAllBytesAsync(filePath, bytes);
 
                 var catImage = new CatImgResponses
                 {
                     ResponseCode = code,
-                    Data = bytes
+                    Data = filePath 
                 };
 
                 _context!.CatImgResponses.Add(catImage);
 
-                Console.WriteLine($"Inserted {code}.jpg ({bytes.Length} bytes)");
+                Console.WriteLine($"Inserted {code}.jpg. Stored file path: {filePath}");
             }
             catch (HttpRequestException)
             {
                 Console.WriteLine($"Not found {code}");
+            }
+            catch (Exception ex) when (ex is IOException || ex is UnauthorizedAccessException)
+            {
+                Console.WriteLine($"Error saving file for {code}: {ex.Message}");
             }
         }
 

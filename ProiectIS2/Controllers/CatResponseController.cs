@@ -8,136 +8,133 @@ using Microsoft.EntityFrameworkCore;
 using ProiectIS2.Contexts;
 using ProiectIS2.Models.Domain;
 using ProiectIS2.Models.DTOs;
+using ProiectIS2.Models.DTOs.Pagination;
+using ProiectIS2.Services.Abstractions;
+using ProiectIS2.Services.Implementations;
 
 namespace ProiectIS2.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-    public class CatResponseController : ControllerBase
+    public class CatResponseController(IObjectService<CatImgResponsesRecord, PaginationQueryParams, CatImgResponseAddRecord, CatImgResponseUpdateRecord> catImgResponsesService) : ControllerBase
     {
-        private readonly ApplicationDbContext _context;
-
-        public CatResponseController(ApplicationDbContext context)
-        {   
-            _context = context;
-        }
-
         // GET: api/CatResponse
         [HttpGet]
         [Produces("application/json")]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
-        public async Task<ActionResult<IEnumerable<CatImgResponses>>> GetCatImgResponses()
+        public async Task<ActionResult<PagedResponse<CatImgResponses>>> GetCatImgResponses([FromQuery]PaginationQueryParams queryParams)
         {
-            return await _context.CatImgResponses.ToListAsync();
+            return Ok(await catImgResponsesService.GetObjects(queryParams));
         }
         
-        // GET: api/CatResponse/5
-        
-        [HttpGet("{ResponseCode}")]
+        // GET: api/CatResponse/404
+        [HttpGet("{responseCode:int}")]
         [Produces("application/json")]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
-        public async Task<ActionResult<CatImgResponses>> GetCatImgResponses(int ResponseCode)
+        public async Task<ActionResult<CatImgResponses>> GetCatImgResponse([FromRoute]int responseCode)
         {
-            var catImgResponses = await _context.CatImgResponses.FindAsync(ResponseCode);
+            var catImgResponses = await catImgResponsesService.GetObject(responseCode);
 
-            if (catImgResponses == null)
-            {
-                return NotFound();
-            }
-
-            return catImgResponses;
+            return catImgResponses == null ? NotFound() : Ok(catImgResponses);
         }
         
-        // GET: api/CatResponse/5
-        
-        [HttpGet("{ResponseCode}.jpg")]
+        // GET: api/CatResponse/404.jpg
+        [HttpGet("{responseCode:int}.jpg")]
         [Produces("image/jpeg")]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
-        public async Task<IActionResult> GetCatImgResponsesJpg(int ResponseCode)
+        public async Task<IActionResult> GetCatImgResponsesJpg([FromRoute]int responseCode)
         {
-            var catImgResponses = await _context.CatImgResponses.FindAsync(ResponseCode);
+            var catImgResponses = await catImgResponsesService.GetObject(responseCode);
 
             if (catImgResponses == null)
             {
                 return NotFound();
             }
+            
+            string filePath = catImgResponses.DataLocation;
 
-            return File(catImgResponses.Data, "image/jpeg");
+            if (!System.IO.File.Exists(filePath))
+            {
+                Console.WriteLine($"Error: File not found at path: {filePath}");
+                return NotFound();
+            }
+
+            try
+            {
+                var fileBytes = await System.IO.File.ReadAllBytesAsync(filePath);
+                
+                return File(fileBytes, "image/jpeg");
+            }
+            catch (IOException ex)
+            {
+                Console.WriteLine($"Error reading file from path {filePath}: {ex.Message}");
+                return StatusCode(500, "Could not read the image file from the server.");
+            }
         }
 
         // PUT: api/CatResponse/200
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
-        
-        [HttpPut("{ResponseCode}")]
+
+        [HttpPut]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
-        public async Task<IActionResult> PutCatImgResponses([FromRoute] int ResponseCode, [FromForm] CatImgResponsesDto catImgResponses)
+        public async Task<IActionResult> PutCatImgResponses(
+            [FromForm] CatImgResponseUpdateRecord catImgResponsesUpdate)
         {
-            var catImg = await _context.Set<CatImgResponses>().FirstOrDefaultAsync(e => e.ResponseCode == ResponseCode);
-
-            if (catImg == null)
-            {
-                return NotFound();
-            }
-
-            using var memoryStream = new MemoryStream();
-            await catImgResponses.Data.CopyToAsync(memoryStream);
-            catImg.Data = memoryStream.ToArray();
-            
             try
             {
-                await _context.SaveChangesAsync();
-            }
-            catch (DbUpdateConcurrencyException)
-            {
-                if (!CatImgResponsesExists(ResponseCode))
-                {
-                    return NotFound();
-                }
-            }
+                await catImgResponsesService.UpdateObject(catImgResponsesUpdate);
 
-            return NoContent();
+                return NoContent();
+            }
+            catch (KeyNotFoundException)
+            {
+                return StatusCode(StatusCodes.Status404NotFound, $"Image {catImgResponsesUpdate.ResponseCode} not found on server. Upload it first.");
+            }
+            catch (Exception)
+            {
+                return StatusCode(StatusCodes.Status500InternalServerError, "Error updating image.");
+            }
         }
 
         // POST: api/CatResponse
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
-        
         [HttpPost]
-        [Produces("application/json")]
-        [ProducesResponseType(StatusCodes.Status200OK)]
-        [ProducesResponseType(StatusCodes.Status404NotFound)]
-        public async Task<ActionResult<CatImgResponses>> PostCatImgResponses(CatImgResponses catImgResponses)
+        public async Task<ActionResult> PostCatImgResponses(
+            [FromForm] CatImgResponseAddRecord catImgResponsesRecord) 
         {
-            _context.CatImgResponses.Add(catImgResponses);
-            await _context.SaveChangesAsync();
-
-            return CreatedAtAction("GetCatImgResponses", new { catImgResponses.ResponseCode }, catImgResponses);
-        }
-
-        // DELETE: api/CatResponse/5
-        [HttpDelete("{ResponseCode}")]
-        [ProducesResponseType(StatusCodes.Status200OK)]
-        [ProducesResponseType(StatusCodes.Status404NotFound)]
-        public async Task<IActionResult> DeleteCatImgResponses(int ResponseCode)
-        {
-            var catImgResponses = await _context.CatImgResponses.FindAsync(ResponseCode);
-            if (catImgResponses == null)
+            try
             {
-                return NotFound();
+                await catImgResponsesService.AddObject(catImgResponsesRecord);
+
+            
+                return CreatedAtAction(nameof(GetCatImgResponsesJpg), 
+                    new { responseCode = catImgResponsesRecord.ResponseCode }, 
+                    null);
             }
-
-            _context.CatImgResponses.Remove(catImgResponses);
-            await _context.SaveChangesAsync();
-
-            return NoContent();
+            catch (InvalidOperationException ex) when (ex.Message.Contains("already exists"))
+            {
+                return Conflict(ex.Message);
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Error during image upload: {ex.Message}");
+                return StatusCode(StatusCodes.Status500InternalServerError, "Error processing file upload.");
+            }
         }
 
-        private bool CatImgResponsesExists(int ResponseCode)
+        // DELETE: api/CatResponse/404
+        [HttpDelete("{responseCode:int}")]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        public async Task<IActionResult> DeleteCatImgResponses(int responseCode)
         {
-            return _context.CatImgResponses.Any(e => e.ResponseCode == ResponseCode);
+            await catImgResponsesService.DeleteObject(responseCode);
+            
+            return Ok();
         }
     }
 }
