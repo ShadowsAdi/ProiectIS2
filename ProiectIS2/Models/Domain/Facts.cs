@@ -14,7 +14,7 @@ public class Facts {
     
     [ForeignKey("CategoryId")]
     public Category? Category { get; set; }
-    public bool SpecialType { get; init; }
+    public bool SpecialType { get; set; }
     
     // https://learn.microsoft.com/en-us/aspnet/core/data/ef-mvc/complex-data-model?view=aspnetcore-8.0
     // https://learn.microsoft.com/en-us/dotnet/standard/base-types/custom-date-and-time-format-strings

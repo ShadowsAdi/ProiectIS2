@@ -1,11 +1,11 @@
 using Microsoft.EntityFrameworkCore;
 using ProiectIS2.Contexts;
+using ProiectIS2.Models.DataTransferObjects.CatImgResponsesDTO;
+using ProiectIS2.Models.DataTransferObjects.Pagination;
 using ProiectIS2.Models.Domain;
-using ProiectIS2.Models.DTOs;
-using ProiectIS2.Models.DTOs.Pagination;
 using ProiectIS2.Services.Abstractions;
 
-namespace ProiectIS2.Services.Implementations;
+namespace ProiectIS2.Services.Implementations.CatImgResponseImpl;
 
 public class CatImgService(ApplicationDbContext context) : IObjectService<CatImgResponsesRecord, PaginationQueryParams, CatImgResponseAddRecord, CatImgResponseUpdateRecord>
 {
@@ -40,7 +40,7 @@ public class CatImgService(ApplicationDbContext context) : IObjectService<CatImg
             .FirstOrDefaultAsync(e => e.ResponseCode == objectId);
     }
 
-    public async Task AddObject(CatImgResponseAddRecord obj)
+    public async Task<int> AddObject(CatImgResponseAddRecord obj)
     {
         if (await context.Set<CatImgResponses>().AnyAsync(e => e.ResponseCode == obj.ResponseCode))
         {
@@ -71,6 +71,8 @@ public class CatImgService(ApplicationDbContext context) : IObjectService<CatImg
     
         await context.Set<CatImgResponses>().AddAsync(entity);
         await context.SaveChangesAsync();
+
+        return entity.ResponseCode;
     }
 
     public async Task UpdateObject(CatImgResponseUpdateRecord obj)

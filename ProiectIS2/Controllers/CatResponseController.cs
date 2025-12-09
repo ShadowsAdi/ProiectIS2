@@ -1,16 +1,7 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
-using ProiectIS2.Contexts;
-using ProiectIS2.Models.Domain;
-using ProiectIS2.Models.DTOs;
-using ProiectIS2.Models.DTOs.Pagination;
+using ProiectIS2.Models.DataTransferObjects.CatImgResponsesDTO;
+using ProiectIS2.Models.DataTransferObjects.Pagination;
 using ProiectIS2.Services.Abstractions;
-using ProiectIS2.Services.Implementations;
 
 namespace ProiectIS2.Controllers
 {
@@ -23,7 +14,7 @@ namespace ProiectIS2.Controllers
         [Produces("application/json")]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
-        public async Task<ActionResult<PagedResponse<CatImgResponses>>> GetCatImgResponses([FromQuery]PaginationQueryParams queryParams)
+        public async Task<ActionResult<PagedResponse<CatImgResponsesRecord>>> GetCatImgResponses([FromQuery]PaginationQueryParams queryParams)
         {
             return Ok(await catImgResponsesService.GetObjects(queryParams));
         }
@@ -33,7 +24,7 @@ namespace ProiectIS2.Controllers
         [Produces("application/json")]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
-        public async Task<ActionResult<CatImgResponses>> GetCatImgResponse([FromRoute]int responseCode)
+        public async Task<ActionResult<CatImgResponsesRecord>> GetCatImgResponse([FromRoute]int responseCode)
         {
             var catImgResponses = await catImgResponsesService.GetObject(responseCode);
 
@@ -108,12 +99,12 @@ namespace ProiectIS2.Controllers
         {
             try
             {
-                await catImgResponsesService.AddObject(catImgResponsesRecord);
+                var entId = await catImgResponsesService.AddObject(catImgResponsesRecord);
 
             
                 return CreatedAtAction(nameof(GetCatImgResponsesJpg), 
-                    new { responseCode = catImgResponsesRecord.ResponseCode }, 
-                    null);
+                    new { responseCode = entId }, 
+                    new { ResponseCode = entId });
             }
             catch (InvalidOperationException ex) when (ex.Message.Contains("already exists"))
             {
@@ -129,7 +120,6 @@ namespace ProiectIS2.Controllers
         // DELETE: api/CatResponse/404
         [HttpDelete("{responseCode:int}")]
         [ProducesResponseType(StatusCodes.Status200OK)]
-        [ProducesResponseType(StatusCodes.Status404NotFound)]
         public async Task<IActionResult> DeleteCatImgResponses(int responseCode)
         {
             await catImgResponsesService.DeleteObject(responseCode);
