@@ -12,8 +12,7 @@ public class CatImgResponses
     // https://mariadb.com/docs/server/reference/data-types/string-data-types/mediumblob
     // ahrisuficient pentru asta
     [Required]
-    [Column(TypeName = "MEDIUMBLOB")]
-    public byte[] Data { get; set; } = Array.Empty<byte>();
+    public String Data { get; set; }
     
     [DataType(DataType.Date)]
     [DisplayFormat(DataFormatString = "{0:yyyy-MM-dd HH:mm:ss}", ApplyFormatInEditMode = true)]

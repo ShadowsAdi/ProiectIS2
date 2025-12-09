@@ -4,6 +4,10 @@ using Microsoft.Extensions.DependencyInjection;
 using ProiectIS2.Database.Seeders;
 using ProiectIS2.Middleware;
 using dotenv.net;
+using ProiectIS2.Services.Abstractions;
+using ProiectIS2.Services.Implementations;
+using ProiectIS2.Models.DTOs;
+using ProiectIS2.Models.DTOs.Pagination;
 
 namespace ProiectIS2;
 
@@ -22,6 +26,8 @@ public class Program
         // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
         builder.Services.AddEndpointsApiExplorer();
         builder.Services.AddSwaggerGen();
+        
+        builder.Services.AddScoped<IObjectService<CatImgResponsesRecord, PaginationQueryParams, CatImgResponseAddRecord, CatImgResponseUpdateRecord>, CatImgService>();
         
         DotEnv.Load();
         

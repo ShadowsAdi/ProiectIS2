@@ -37,12 +37,14 @@
       DB_HOST: mysql_db
       DB_DATABASE: proiectis2_db
       USE_MIDDLEWARE: "no"
-      SEED_DATABASE: "no"
+      SEED_DATABASE: "yes"
       ASPNETCORE_ENVIRONMENT: Development
     depends_on:
       mysql_db:
         condition: service_healthy
     restart: on-failure
+    volumes:
+      - ./responses:/app/responses
 
 volumes:
   db_data:
